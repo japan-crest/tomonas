@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>TOMONAS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="format-detection" content="telephone=no">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#ffffff">
+
+<!-- Home-screen icon and name (this is the reason this page exists) -->
+<meta name="apple-mobile-web-app-title" content="TOMONAS">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+
+<script>
+/* Decide before anything is drawn.
+   ?go    ... opened from the home-screen icon or a bookmark: move to the app at once.
+   ?setup ... always show how to add the icon.
+   The home screen keeps the address shown at the moment the icon is added,
+   so while the guide is on screen the address is switched to "?go". */
+(function () {
+  var APP = 'https://script.google.com/macros/s/AKfycbyA5gbKtxuSD-Ve79eeB2KKaI9hnc38v9nP2K_SH_mfAhLPp1aO8SvzNOSf9j4cJpcAFw/exec';
+  window.TOMONAS_APP = APP;
+
+  var query = new URLSearchParams(location.search);
+  var remembered = false;
+  try { remembered = localStorage.getItem('tomonas.auto') === '1'; } catch (e) {}
+
+  if (!query.has('setup') && (query.has('go') || remembered)) {
+    document.documentElement.className = 'going';
+    location.replace(APP);
+  } else {
+    try { history.replaceState(null, '', location.pathname + '?go'); } catch (e) {}
+  }
+})();
+</script>
+
+<style>
+  :root {
+    --blue: #0041ff;      /* ロゴの外周の青 */
+    --blue-deep: #002fc0;
+    --cyan: #00c0ff;
+    --aqua: #41ffff;
+    --ink: #0a1b4d;
+    --ink-soft: #4a5878;
+    --line: #d6e0f2;
+    --wash: #f1f7ff;
+    --paper: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Hiragino Sans", "BIZ UDPGothic", "Yu Gothic UI", "Noto Sans JP", "Noto Sans CJK JP", sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--blue); }
+  :focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
+
+  .page { padding-bottom: calc(2.5rem + env(safe-area-inset-bottom)); }
+  .guide, .moving { max-width: 30rem; margin: 0 auto; }
+
+  /* ---- 上：ロゴの楕円を大きく見せ、その縁にアイコンを載せる ---- */
+  .hero { position: relative; overflow: hidden; padding: 6.25rem 1.5rem 0; text-align: center; }
+  .hero::before {
+    content: "";
+    position: absolute; left: 50%; top: -15.5rem;
+    width: max(46rem, 130vw); height: 24rem; margin-left: calc(max(46rem, 130vw) / -2);
+    border-radius: 50%;
+    background:
+      linear-gradient(105deg, transparent 38%, rgba(255,255,255,.55) 50%, transparent 62%),
+      linear-gradient(180deg, var(--blue) 0%, var(--cyan) 62%, var(--aqua) 100%);
+    box-shadow: inset 0 -0.75rem 0 var(--blue);
+  }
+  .tile {
+    position: relative;
+    display: block; width: 6.5rem; height: 6.5rem; margin: 0 auto;
+    border-radius: 23%;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(10,27,77,.10), 0 .9rem 1.6rem -0.6rem rgba(0,47,192,.45);
+  }
+  h1 {
+    margin: 1rem 0 0;
+    font-size: 2rem; line-height: 1.2; font-weight: 800; letter-spacing: .14em;
+    padding-left: .14em; /* 字間ぶんの寄りを戻す */
+  }
+  .owner { margin: .25rem 0 0; color: var(--ink-soft); font-size: .94rem; }
+
+  /* ---- 手順 ---- */
+  .guide { padding: 2rem 1.5rem 0; }
+  h2 { margin: 0; font-size: 1.25rem; line-height: 1.45; font-weight: 700; }
+  .lead { margin: .35rem 0 0; color: var(--ink-soft); font-size: .94rem; }
+
+  .devices { display: flex; margin: 1.25rem 0 0; padding: .25rem; gap: .25rem; background: var(--wash); border-radius: .9rem; }
+  .devices button {
+    flex: 1; min-height: 2.75rem; border: 0; border-radius: .7rem;
+    background: transparent; color: var(--ink-soft);
+    font: inherit; font-size: .94rem; font-weight: 600; cursor: pointer;
+  }
+  .devices button[aria-selected="true"] { background: var(--paper); color: var(--ink); box-shadow: 0 0 0 1px var(--line); }
+
+  .steps { list-style: none; margin: 1.1rem 0 0; padding: 0; counter-reset: step; }
+  .steps[hidden] { display: none; }
+  .steps li { position: relative; padding: .85rem 0 .85rem 3.9rem; border-top: 1px solid var(--line); counter-increment: step; }
+  .steps li:first-child { border-top: 0; }
+  .steps li::before {
+    /* 番号はロゴと同じ楕円に入れる */
+    content: counter(step);
+    position: absolute; left: 0; top: .95rem;
+    width: 3rem; height: 1.75rem; border-radius: 50%;
+    background: var(--blue); color: #fff;
+    font-weight: 800; font-size: 1rem; line-height: 1.75rem; text-align: center;
+  }
+  .steps strong { display: block; font-weight: 700; line-height: 1.55; }
+  .steps small { display: block; margin-top: .2rem; color: var(--ink-soft); font-size: .86rem; line-height: 1.6; }
+  .key { white-space: nowrap; }
+
+  /* ---- 開くボタン ---- */
+  .open {
+    display: block; margin: 1.5rem 0 0; padding: 1rem 1.25rem;
+    border-radius: .9rem; background: var(--blue); color: #fff;
+    font-size: 1.1rem; font-weight: 700; text-align: center; text-decoration: none;
+  }
+  .open:active { background: var(--blue-deep); }
+  .note { margin: .9rem 0 0; color: var(--ink-soft); font-size: .86rem; }
+
+  /* ---- 自動でトモナスへ移るとき ---- */
+  .moving { display: none; padding: 1.75rem 1.5rem 0; text-align: center; }
+  .moving p { margin: 0; font-weight: 600; }
+  .moving .late { visibility: hidden; margin-top: 1.5rem; }
+  .moving .late.show { visibility: visible; }
+  .moving .late p { font-weight: 400; color: var(--ink-soft); font-size: .94rem; }
+  .moving .late .open { margin-top: .75rem; }
+  .moving .late .again { display: inline-block; margin-top: 1.1rem; font-size: .94rem; }
+
+  .going .guide { display: none; }
+  .going .moving { display: block; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <img class="tile" src="apple-touch-icon.png" width="104" height="104" alt="日本クレストのロゴ">
+    <h1>TOMONAS</h1>
+    <p class="owner">日本クレスト株式会社の業務アプリ「トモナス」</p>
+  </header>
+
+  <!-- 初めて開いたとき：アイコンの置き方 -->
+  <main class="guide">
+    <h2>ホーム画面にこのアイコンを置く</h2>
+    <p class="lead">最初に一度だけ行います。次からは、アイコンを押すとトモナスが開きます。</p>
+
+    <div class="devices" role="tablist" aria-label="お使いの機器">
+      <button type="button" role="tab" id="tab-ios" aria-controls="steps-ios" aria-selected="false" data-device="ios">iPhone</button>
+      <button type="button" role="tab" id="tab-android" aria-controls="steps-android" aria-selected="false" data-device="android">Android</button>
+      <button type="button" role="tab" id="tab-pc" aria-controls="steps-pc" aria-selected="true" data-device="pc">パソコン</button>
+    </div>
+
+    <ol class="steps" id="steps-ios" role="tabpanel" aria-labelledby="tab-ios" hidden>
+      <li>
+        <strong>Safari でこのページを開く</strong>
+      </li>
+      <li>
+        <strong><span class="key">「…」から</span><span class="key">「共有」を押し、</span><span class="key">「ホーム画面に追加」</span>を選ぶ</strong>
+        <small>共有ボタン（四角から上向きの矢印が出ている形）が見えていれば、それを押します。</small>
+      </li>
+      <li>
+        <strong><span class="key">「Web アプリとして開く」</span>を<span class="key">オフにして、</span><span class="key">「追加」を押す</span></strong>
+        <small>この項目が出ないときは、そのまま「追加」を押します。</small>
+      </li>
+    </ol>
+
+    <ol class="steps" id="steps-android" role="tabpanel" aria-labelledby="tab-android" hidden>
+      <li>
+        <strong>Chrome でこのページを開く</strong>
+      </li>
+      <li>
+        <strong><span class="key">右上の「︙」を押し、</span><span class="key">「ホーム画面に追加」</span>を選ぶ</strong>
+      </li>
+      <li>
+        <strong>「追加」を押す</strong>
+        <small>「インストール」と「ショートカットを作成」が出たら、「ショートカットを作成」を選びます。</small>
+      </li>
+    </ol>
+
+    <ol class="steps" id="steps-pc" role="tabpanel" aria-labelledby="tab-pc">
+      <li>
+        <strong>このページを<span class="key">ブックマーク（お気に入り）</span>に登録する</strong>
+        <small><span class="key">Ctrl + D</span> で登録できます。</small>
+      </li>
+      <li>
+        <strong>次からは、登録したブックマークを押す</strong>
+      </li>
+    </ol>
+
+    <a class="open" href="#" data-open>トモナスを開く</a>
+    <p class="note">使えるのは、会社に登録した Google アカウントだけです。ログインを求められたら、そのアカウントでログインしてください。</p>
+  </main>
+
+  <!-- アイコンやブックマークから開いたとき：トモナスへ移る -->
+  <section class="moving" aria-live="polite">
+    <p>トモナスを開いています</p>
+    <div class="late" id="late">
+      <p>開かないときは、下のボタンを押してください。</p>
+      <a class="open" href="#" data-open>トモナスを開く</a>
+      <a class="again" href="?setup">アイコンの置き方を見る</a>
+    </div>
+  </section>
+
+  <noscript>
+    <p style="padding:1.5rem;text-align:center">
+      <a href="https://script.google.com/macros/s/AKfycbyA5gbKtxuSD-Ve79eeB2KKaI9hnc38v9nP2K_SH_mfAhLPp1aO8SvzNOSf9j4cJpcAFw/exec">トモナスを開く</a>
+    </p>
+  </noscript>
+</div>
+
+<script>
+(function () {
+  var APP = window.TOMONAS_APP;
+
+  // 「トモナスを開く」：次からこのページを開いたら自動で移るよう覚えておく
+  Array.prototype.forEach.call(document.querySelectorAll('[data-open]'), function (link) {
+    link.href = APP;
+    link.addEventListener('click', function () {
+      try { localStorage.setItem('tomonas.auto', '1'); } catch (e) {}
+    });
+  });
+
+  // 機器に合わせて手順を出し分ける
+  var ua = navigator.userAgent;
+  var device = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? 'ios'
+             : /Android/.test(ua) ? 'android' : 'pc';
+  var tabs = document.querySelectorAll('.devices button');
+  function show(name) {
+    Array.prototype.forEach.call(tabs, function (tab) {
+      var on = tab.getAttribute('data-device') === name;
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      document.getElementById('steps-' + tab.getAttribute('data-device')).hidden = !on;
+    });
+  }
+  Array.prototype.forEach.call(tabs, function (tab) {
+    tab.addEventListener('click', function () { show(tab.getAttribute('data-device')); });
+  });
+  show(device);
+
+  // 自動で移れなかったとき（通信が切れている等）は、少し待ってボタンを出す
+  if (document.documentElement.className === 'going') {
+    setTimeout(function () { document.getElementById('late').className = 'late show'; }, 2500);
+  }
+})();
+</script>
+</body>
+</html>
