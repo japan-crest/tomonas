@@ -11,6 +11,7 @@
 
 <!-- Home-screen icon and name (this is the reason this page exists) -->
 <meta name="apple-mobile-web-app-title" content="TOMONAS">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
 
@@ -25,10 +26,11 @@
   window.TOMONAS_APP = APP;
 
   var query = new URLSearchParams(location.search);
-  var remembered = false;
-  try { remembered = localStorage.getItem('tomonas.auto') === '1'; } catch (e) {}
+  // Opened from a home-screen icon that runs as its own app (iPhone).
+  var asApp = window.navigator.standalone === true ||
+              (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
 
-  if (!query.has('setup') && (query.has('go') || remembered)) {
+  if (!query.has('setup') && (query.has('go') || asApp)) {
     document.documentElement.className = 'going';
     location.replace(APP);
   } else {
@@ -172,8 +174,12 @@
         <small>共有ボタン（四角から上向きの矢印が出ている形）が見えていれば、それを押します。</small>
       </li>
       <li>
-        <strong><span class="key">「Web アプリとして開く」</span>を<span class="key">オフにして、</span><span class="key">「追加」を押す</span></strong>
-        <small>この項目が出ないときは、そのまま「追加」を押します。</small>
+        <strong>「追加」を押す</strong>
+        <small>「Web アプリとして開く」は、オンのままにします。</small>
+      </li>
+      <li>
+        <strong><span class="key">置いたアイコンを押し、</span><span class="key">会社の Google アカウントで</span>ログインする</strong>
+        <small>ログインは最初の一度だけです。次からは、そのままトモナスが開きます。</small>
       </li>
     </ol>
 
@@ -225,12 +231,8 @@
 (function () {
   var APP = window.TOMONAS_APP;
 
-  // 「トモナスを開く」：次からこのページを開いたら自動で移るよう覚えておく
   Array.prototype.forEach.call(document.querySelectorAll('[data-open]'), function (link) {
     link.href = APP;
-    link.addEventListener('click', function () {
-      try { localStorage.setItem('tomonas.auto', '1'); } catch (e) {}
-    });
   });
 
   // 機器に合わせて手順を出し分ける
